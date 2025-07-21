@@ -33,8 +33,8 @@ public class User {
   @Enumerated(EnumType.STRING)
   private Role role;
 
-  @Column(name = "is_active", nullable = false)
-  private boolean active;
+  @Column(name = "is_validated", nullable = false)
+  private boolean validated;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Booking> bookings = new ArrayList<>();

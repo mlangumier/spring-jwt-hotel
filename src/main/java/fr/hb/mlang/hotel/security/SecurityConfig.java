@@ -14,12 +14,12 @@ public class SecurityConfig {
 
   @Bean
   SecurityFilterChain accessControl(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable) // Prevent injections trying to steal cookies
+    http.csrf(AbstractHttpConfigurer::disable) // Prevent injections trying to steal cookies (no sessions)
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .anyRequest().permitAll()) // Open all routes to public (for now)
         .sessionManagement(session -> session
             .sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS)); // Prevents Spring Security from managing sessions (we'll be doing it ourselves with JWT)
+                SessionCreationPolicy.STATELESS)); // Prevents Spring Security from managing sessions (we're only using JWT)
 
     return http.build();
   }

@@ -21,14 +21,14 @@ public class Room {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
+  @Column(name = "name", nullable = false)
+  private String name;
+
   @Column(name = "capacity", nullable = false)
   private int capacity;
 
   @Column(name = "price", nullable = false)
   private Double price;
-
-  @Column(name = "number", nullable = false)
-  private String number;
 
   @ManyToMany(mappedBy = "rooms")
   private List<Booking> bookings = new ArrayList<>();

@@ -1,0 +1,10 @@
+services:
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_DATABASE=spring_hotel'
+      - 'MYSQL_ROOT_PASSWORD=root'
+      - 'MYSQL_USER=dev'
+      - 'MYSQL_PASSWORD=password'
+    ports:
+      - '3306:3306'

@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.auth.email;
+package fr.hb.mlang.hotel.email;
 
 public interface EmailService {
 

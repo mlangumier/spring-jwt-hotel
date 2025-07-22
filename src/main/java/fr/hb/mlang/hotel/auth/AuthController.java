@@ -1,10 +1,15 @@
 package fr.hb.mlang.hotel.auth;
 
-import fr.hb.mlang.hotel.auth.email.EmailDetails;
-import fr.hb.mlang.hotel.auth.email.EmailService;
+import fr.hb.mlang.hotel.auth.dto.AuthMapper;
+import fr.hb.mlang.hotel.auth.dto.RegisterCredentialsDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -12,12 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class AuthController {
 
-  private final EmailService emailService;
+  private final AuthServiceImpl authService;
+  private final UserDetailsService userService;
+  private final AuthMapper mapper;
 
-  @GetMapping("/validate")
-  public void validateEmail() {
-    EmailDetails email = new EmailDetails("vevewe1937@dosonex.com", "First test email", "Hello, there!", null);
+  @PostMapping("/register")
+  @ResponseStatus(HttpStatus.CREATED)
+  public String register(@RequestBody @Valid RegisterCredentialsDTO credentialsDTO) {
+    authService.register(mapper.convertToUser(credentialsDTO));
 
-    emailService.sendEmail(email);
+    return "Please, check your emails.";
+  }
+
+  @PostMapping("/validate")
+  public String validate(@RequestBody String email) {
+    //TODO:
+//    UserDetails user = userService.loadUserByUsername(email);
+//    authService.validateUser(user);
+
+    return "Your account has been validated";
   }
 }

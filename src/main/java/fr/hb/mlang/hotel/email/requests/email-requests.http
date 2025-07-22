@@ -1,0 +1,13 @@
+### Variables
+@baseUrl = http://localhost:8080/api/v1/auth
+
+### Register a new User & send validation email (with body)
+POST {{baseUrl}}/register
+Content-Type: application/json
+{
+  "email": "email@test.com",
+  "password": "password"
+}
+
+### Validate a user with their email
+POST {{baseUrl}}/validate

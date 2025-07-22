@@ -1,0 +1,12 @@
+package fr.hb.mlang.hotel.auth.dto;
+
+import fr.hb.mlang.hotel.user.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants.ComponentModel;
+import org.mapstruct.ReportingPolicy;
+
+@Mapper(componentModel = ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface AuthMapper {
+
+  User convertToUser(RegisterCredentialsDTO credentialsDTO);
+}

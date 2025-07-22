@@ -1,5 +1,0 @@
-# Variables
-@baseUrl = http://localhost:8080
-
-# Test email
-GET {{baseUrl}}/api/v1/auth/validate

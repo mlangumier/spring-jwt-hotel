@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.auth.email;
+package fr.hb.mlang.hotel.email;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

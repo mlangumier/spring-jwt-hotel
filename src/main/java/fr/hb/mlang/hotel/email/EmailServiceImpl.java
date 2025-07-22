@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.auth.email;
+package fr.hb.mlang.hotel.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -32,7 +32,7 @@ public class EmailServiceImpl implements EmailService {
 
       mailSender.send(message);
     } catch (MessagingException e) {
-      throw new RuntimeException("Couldn't send email: " + e.getMessage());
+      throw new RuntimeException("Email couldn't be sent: " + e.getMessage());
     }
   }
 

@@ -1,8 +1,9 @@
 package fr.hb.mlang.hotel.auth;
 
-import org.springframework.security.core.userdetails.User;
 
-public interface AuthBusiness {
+import fr.hb.mlang.hotel.user.User;
+
+public interface AuthService {
 
   User register(User user);
 

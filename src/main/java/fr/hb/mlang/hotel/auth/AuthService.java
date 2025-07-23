@@ -8,7 +8,7 @@ public interface AuthService {
 
   AuthResponseDTO register(RegisterRequestDTO request);
 
-  void validateUser(User user);
+  AuthResponseDTO verifyAccount(String token);
 
   void resetPassword(String email);
 

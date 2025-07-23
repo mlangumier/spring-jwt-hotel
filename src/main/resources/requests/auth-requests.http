@@ -10,4 +10,4 @@ Content-Type: application/json
 }
 
 ### Validate a user with their email
-POST {{baseUrl}}/validate
+POST {{baseUrl}}/verify?token=

@@ -4,5 +4,5 @@ public interface EmailService {
 
   void sendEmail(EmailDetails email);
 
-  String getVerificationMailContent();
+  String getVerificationMailContent(String jwtToken);
 }

@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.auth;
+package fr.hb.mlang.hotel.auth.business;
 
 import fr.hb.mlang.hotel.auth.dto.AuthMapper;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;

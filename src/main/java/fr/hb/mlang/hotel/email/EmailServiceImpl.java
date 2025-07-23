@@ -3,7 +3,6 @@ package fr.hb.mlang.hotel.email;
 import fr.hb.mlang.hotel.email.exception.EmailSendingException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -42,12 +41,11 @@ public class EmailServiceImpl implements EmailService {
   }
 
   @Override
-  public String getVerificationMailContent() {
+  public String getVerificationMailContent(String jwtToken) {
     Context context = new Context();
 
-    String token = UUID.randomUUID().toString();
     String serverUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
-    String verificationUrl = serverUrl + "/api/v1/auth/validate?token=" + token;
+    String verificationUrl = serverUrl + "/api/v1/auth/verify/" + jwtToken;
 
     context.setVariable("verificationUrl", verificationUrl);
     return templateEngine.process("user-verify", context);

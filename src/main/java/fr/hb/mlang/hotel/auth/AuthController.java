@@ -28,7 +28,18 @@ public class AuthController {
   @PostMapping("/verify")
   public ResponseEntity<AuthResponseDTO> verify(@RequestParam("token") String token) {
     AuthResponseDTO response = authService.verifyAccount(token);
-
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
+
+//  @PostMapping("/login")
+//  public ResponseEntity<AuthResponseDTO> login(@RequestParam("token") String token) {
+//    AuthResponseDTO response = authService.login(token);
+//    return ResponseEntity.status(HttpStatus.ACCEPTED).body("");
+//  }
+
+//  @PostMapping("/logout")
+//  public ResponseEntity<AuthResponseDTO> logout(@RequestParam("token") String token) {
+//    AuthResponseDTO response = authService.logout(token);
+//    return ResponseEntity.status(HttpStatus.OK).body(response);
+//  }
 }

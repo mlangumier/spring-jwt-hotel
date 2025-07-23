@@ -17,3 +17,62 @@ In `application.properties`, `spring.profiles.active=dev` signals Spring Boot we
 `application-dev.properties` file for local set up that won't be added to the `Github` repository (
 need to add `application-dev.properties` to the `.gitignore` manually). In this file, the username (
 Gmail email address) and password (Gmail app password for this project) are added locally. 
+
+## Possible improvements
+
+### Folder Structure : Feature-based architecture (with MVC inside folders)
+
+```
+src/main/java/com/yourapp
+└── auth/
+    ├── controller/
+    │   └── AuthController.java                 # POST /register, /login, /verify, /logout
+    ├── dto/
+    │   ├── RegisterRequestDTO.java
+    │   ├── LoginRequestDTO.java
+    │   ├── AuthResponseDTO.java
+    │   └── EmailVerificationDTO.java
+    ├── service/
+    │   ├── AuthService.java                    # interface
+    │   └── AuthServiceImpl.java
+    ├── business/
+    │   ├── RegistrationManager.java            # prepares & verifies users
+    │   └── LoginManager.java                   # handles login logic
+    ├── mapper/
+    │   └── AuthMapper.java                     # MapStruct mapper for DTOs ↔ entities
+    └── exception/
+        └── InvalidTokenException.java
+
+└── user/
+    ├── entity/
+    │   └── User.java
+    ├── repository/
+    │   └── UserRepository.java
+    ├── service/
+    │   ├── UserService.java
+    │   ├── UserServiceImpl.java
+    │   ├── CustomUserDetails.java             # implements UserDetails
+    │   └── CustomUserDetailsService.java      # implements UserDetailsService
+    └── mapper/
+        └── UserMapper.java                    # Optional if mapping users
+
+└── security/
+    ├── config/
+    │   └── SecurityConfig.java                # HttpSecurity, filters, etc.
+    ├── jwt/
+    │   ├── JwtProvider.java                   # Generate/validate tokens
+    │   ├── JwtAuthenticationFilter.java       # Extract token, set SecurityContext
+    │   └── JwtKeyManager.java                 # Manages secret/algorithm
+    └── filter/
+        └── ExceptionHandlingFilter.java       # Optional centralized exception handling
+```
+
+### (rework) User (entity) vs CustomUserDetails (impl. UserDetails)
+
+| Context                                        | Use `CustomUserDetails`                  | Use `User` entity                                    |
+| ---------------------------------------------- | ---------------------------------------- | ---------------------------------------------------- |
+| **Spring Security Authentication**             | ✅ Yes (required by `UserDetailsService`) | 🚫 No                                                |
+| **`UserDetailsService.loadUserByUsername()`**  | ✅ Yes (return `CustomUserDetails`)       | 🚫 No                                                |
+| **Token generation (JWT)**                     | Can use `CustomUserDetails`, but…        | ✅ Yes (recommended for payload, e.g. subject, roles) |
+| **Registration / Business Logic / DB queries** | 🚫 No                                    | ✅ Yes                                                |
+| **Token decoding and verification**            | 🔄 Usually map decoded token to a `User` | ✅ Yes                                                |

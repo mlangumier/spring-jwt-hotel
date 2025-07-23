@@ -2,7 +2,7 @@ package fr.hb.mlang.hotel.auth;
 
 import fr.hb.mlang.hotel.auth.dto.AuthResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.user.domain.User;
 
 public interface AuthService {
 

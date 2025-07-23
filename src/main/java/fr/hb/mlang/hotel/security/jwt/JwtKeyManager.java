@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.security;
+package fr.hb.mlang.hotel.security.jwt;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import jakarta.annotation.PostConstruct;

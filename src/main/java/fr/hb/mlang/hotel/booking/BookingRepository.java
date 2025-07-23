@@ -1,6 +1,6 @@
 package fr.hb.mlang.hotel.booking;
 
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.user.domain.User;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 

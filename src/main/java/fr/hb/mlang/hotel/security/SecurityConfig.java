@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.config;
+package fr.hb.mlang.hotel.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

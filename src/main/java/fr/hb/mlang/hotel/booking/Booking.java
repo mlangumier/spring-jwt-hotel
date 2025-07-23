@@ -1,7 +1,7 @@
 package fr.hb.mlang.hotel.booking;
 
 import fr.hb.mlang.hotel.room.Room;
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.user.domain.User;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

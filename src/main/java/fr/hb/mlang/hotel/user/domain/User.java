@@ -1,7 +1,6 @@
-package fr.hb.mlang.hotel.user;
+package fr.hb.mlang.hotel.user.domain;
 
 import fr.hb.mlang.hotel.booking.Booking;
-import fr.hb.mlang.hotel.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

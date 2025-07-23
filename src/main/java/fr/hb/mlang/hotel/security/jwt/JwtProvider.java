@@ -1,9 +1,9 @@
-package fr.hb.mlang.hotel.security;
+package fr.hb.mlang.hotel.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.user.domain.User;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;

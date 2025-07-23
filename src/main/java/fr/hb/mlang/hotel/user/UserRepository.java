@@ -1,5 +1,6 @@
 package fr.hb.mlang.hotel.user;
 
+import fr.hb.mlang.hotel.user.domain.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

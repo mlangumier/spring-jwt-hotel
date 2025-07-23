@@ -1,6 +1,7 @@
-package fr.hb.mlang.hotel.security;
+package fr.hb.mlang.hotel.user.security;
 
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.user.domain.CustomUserDetails;
+import fr.hb.mlang.hotel.user.domain.User;
 import fr.hb.mlang.hotel.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

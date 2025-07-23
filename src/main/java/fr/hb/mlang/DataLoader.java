@@ -1,11 +1,11 @@
-package fr.hb.mlang.hotel.config;
+package fr.hb.mlang;
 
 import fr.hb.mlang.hotel.booking.Booking;
 import fr.hb.mlang.hotel.booking.BookingRepository;
-import fr.hb.mlang.hotel.enums.Role;
+import fr.hb.mlang.hotel.user.domain.Role;
 import fr.hb.mlang.hotel.room.Room;
 import fr.hb.mlang.hotel.room.RoomRepository;
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.user.domain.User;
 import fr.hb.mlang.hotel.user.UserRepository;
 import java.time.LocalDate;
 import java.util.List;

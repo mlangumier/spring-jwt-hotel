@@ -1,13 +1,14 @@
-package fr.hb.mlang.hotel.security;
+package fr.hb.mlang.hotel.user.domain;
 
-import fr.hb.mlang.hotel.user.User;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+@Getter
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
@@ -32,8 +33,4 @@ public class CustomUserDetails implements UserDetails {
   public boolean isEnabled() {
     return user.isValidated();
   }
-
-//  public User getUser() {
-//    return user;
-//  }
 }

@@ -1,14 +1,13 @@
 package fr.hb.mlang.hotel.auth;
 
 import fr.hb.mlang.hotel.auth.business.RegistrationManager;
-import fr.hb.mlang.hotel.auth.business.VerificationManager;
 import fr.hb.mlang.hotel.auth.dto.AuthResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;
 import fr.hb.mlang.hotel.email.EmailDetails;
 import fr.hb.mlang.hotel.email.EmailService;
-import fr.hb.mlang.hotel.security.CustomUserDetails;
-import fr.hb.mlang.hotel.security.JwtProvider;
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.user.domain.CustomUserDetails;
+import fr.hb.mlang.hotel.security.jwt.JwtProvider;
+import fr.hb.mlang.hotel.user.domain.User;
 import fr.hb.mlang.hotel.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ public class AuthServiceImpl implements AuthService {
   private final UserRepository userRepository;
   private final EmailService emailService;
   private final RegistrationManager registrationManager;
-  private final VerificationManager verificationManager;
   private final JwtProvider jwtProvider;
 
   @Override
@@ -39,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
   public AuthResponseDTO verifyAccount(String token) {
     CustomUserDetails user = (CustomUserDetails) jwtProvider.validateToken(token);
 
-    User verifiedUser = verificationManager.verifyUser(user.getUsername());
+    User verifiedUser = registrationManager.verifyUser(user.getUsername());
     userRepository.save(verifiedUser);
 
     return new AuthResponseDTO("Account successfully verified!");

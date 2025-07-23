@@ -1,6 +1,7 @@
-package fr.hb.mlang.hotel.auth.dto;
+package fr.hb.mlang.hotel.auth;
 
-import fr.hb.mlang.hotel.user.User;
+import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;
+import fr.hb.mlang.hotel.user.domain.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants.ComponentModel;
 import org.mapstruct.ReportingPolicy;

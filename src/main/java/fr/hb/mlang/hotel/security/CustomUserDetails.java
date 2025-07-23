@@ -3,15 +3,12 @@ package fr.hb.mlang.hotel.security;
 import fr.hb.mlang.hotel.user.User;
 import java.util.Collection;
 import java.util.List;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @RequiredArgsConstructor
-@Getter @Setter
 public class CustomUserDetails implements UserDetails {
 
   private final transient User user;
@@ -33,6 +30,10 @@ public class CustomUserDetails implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return UserDetails.super.isEnabled();
+    return user.isValidated();
   }
+
+//  public User getUser() {
+//    return user;
+//  }
 }

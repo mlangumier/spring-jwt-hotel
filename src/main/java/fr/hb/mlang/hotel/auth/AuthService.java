@@ -1,11 +1,12 @@
 package fr.hb.mlang.hotel.auth;
 
-
+import fr.hb.mlang.hotel.auth.dto.AuthResponseDTO;
+import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;
 import fr.hb.mlang.hotel.user.User;
 
 public interface AuthService {
 
-  User register(User user);
+  AuthResponseDTO register(RegisterRequestDTO request);
 
   void validateUser(User user);
 

@@ -4,5 +4,5 @@ public interface EmailService {
 
   void sendEmail(EmailDetails email);
 
-  void sendMailWithAttachment(EmailDetails email);
+  String getVerificationMailContent();
 }

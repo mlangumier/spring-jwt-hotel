@@ -8,5 +8,5 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AuthMapper {
 
-  User convertToUser(RegisterCredentialsDTO credentialsDTO);
+  User toUser(RegisterRequestDTO credentialsDTO);
 }

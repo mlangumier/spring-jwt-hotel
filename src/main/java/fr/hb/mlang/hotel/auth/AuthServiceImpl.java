@@ -7,15 +7,16 @@ import fr.hb.mlang.hotel.auth.dto.LoginResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;
 import fr.hb.mlang.hotel.email.EmailDetails;
 import fr.hb.mlang.hotel.email.EmailService;
-import fr.hb.mlang.hotel.user.domain.CustomUserDetails;
 import fr.hb.mlang.hotel.security.jwt.JwtProvider;
 import fr.hb.mlang.hotel.user.domain.User;
 import fr.hb.mlang.hotel.user.UserRepository;
+import fr.hb.mlang.hotel.user.security.CustomUserDetails;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,14 +35,11 @@ public class AuthServiceImpl implements AuthService {
     userRepository.save(user);
 
     // Set token duration to 7 days
-    String token = jwtProvider.generateToken(
-        user.getEmail(),
-        Instant.now().plus(7, ChronoUnit.DAYS)
-    );
+    String token = jwtProvider.generateToken(user.getEmail(), Instant.now().plus(7, ChronoUnit.DAYS));
 
     String verificationMailContent = emailService.getVerificationMailContent(token);
     emailService.sendEmail(new EmailDetails(
-        user.getEmail(),
+        user,
         "Welcome to JWT-Hotel",
         verificationMailContent
     ));
@@ -51,9 +49,9 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public AuthResponseDTO verifyAccount(String token) {
-    CustomUserDetails user = (CustomUserDetails) jwtProvider.validateToken(token);
+    User user = (User) jwtProvider.validateToken(token);
 
-    User verifiedUser = registrationManager.verifyUser(user.getUsername());
+    User verifiedUser = registrationManager.verifyUser(user.getEmail());
     userRepository.save(verifiedUser);
 
     return new AuthResponseDTO("Account successfully verified!");
@@ -61,14 +59,14 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public LoginResponseDTO login(LoginRequestDTO credentials) {
-    CustomUserDetails userDetails = (CustomUserDetails) authManager
-        .authenticate(new UsernamePasswordAuthenticationToken(
-            credentials.getEmail(),
-            credentials.getPassword()
-        ))
-        .getPrincipal();
+    Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(
+        credentials.getEmail(),
+        credentials.getPassword()
+    ));
+    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
     String token = jwtProvider.generateToken(userDetails.getUsername());
+
     return new LoginResponseDTO(token, userDetails);
   }
 

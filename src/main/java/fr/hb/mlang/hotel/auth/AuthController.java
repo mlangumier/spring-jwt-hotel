@@ -4,7 +4,7 @@ import fr.hb.mlang.hotel.auth.dto.AuthResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.LoginRequestDTO;
 import fr.hb.mlang.hotel.auth.dto.LoginResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;
-import fr.hb.mlang.hotel.user.domain.CustomUserDetails;
+import fr.hb.mlang.hotel.user.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class AuthController {
 

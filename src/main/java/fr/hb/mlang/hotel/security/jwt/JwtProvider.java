@@ -36,7 +36,7 @@ public class JwtProvider {
   /**
    * Generates a <code>JWT</code> containing the {@link User}'s email.
    *
-   * @param email           Email of the user who will get the token
+   * @param email            Email of the user who will get the token
    * @param tokenExpiration Expiration time and date of the token
    * @return the generated <code>JWT</code>
    */

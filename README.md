@@ -26,53 +26,6 @@ spring.mail.password=<my-gmail-app-password>
 
 ## TODO: Improvements & best practices
 
-### Folder Structure : Feature-based architecture combined with MVC structure inside features (work in progress)
-
-```
-src/main/java/fr/hb/mlang/hotel
-└── auth/
-    ├── controller/
-    │   └── AuthController.java                 # POST /register, /login, /verify, /logout
-    ├── dto/
-    │   ├── RegisterRequestDTO.java
-    │   ├── LoginRequestDTO.java
-    │   ├── AuthResponseDTO.java
-    │   └── EmailVerificationDTO.java
-    ├── service/
-    │   ├── AuthService.java
-    │   └── AuthServiceImpl.java
-    ├── business/
-    │   ├── RegistrationManager.java            # prepares & verifies users
-    │   └── LoginManager.java                   # handles login logic
-    ├── mapper/
-    │   └── AuthMapper.java                     # MapStruct mapper for DTOs ↔ entities
-    └── exception/
-        └── InvalidTokenException.java
-
-└── user/                                       # TODO: rework folder to account for /domain & /security 
-    ├── entity/
-    │   └── User.java
-    ├── repository/
-    │   └── UserRepository.java
-    ├── service/
-    │   ├── UserService.java
-    │   ├── UserServiceImpl.java
-    │   ├── CustomUserDetails.java             # implements UserDetails
-    │   └── CustomUserDetailsService.java      # implements UserDetailsService
-    └── mapper/
-        └── UserMapper.java                    # Optional if mapping users
-
-└── security/
-    ├── config/
-    │   └── SecurityConfig.java                # HttpSecurity, filters, etc.
-    ├── jwt/
-    │   ├── JwtProvider.java                   # Generate/validate tokens
-    │   ├── JwtAuthenticationFilter.java       # Extract token, set SecurityContext
-    │   └── JwtKeyManager.java                 # Manages secret/algorithm
-    └── filter/
-        └── ExceptionHandlingFilter.java       # Optional centralized exception handling
-```
-
 ### (rework) User (entity) vs CustomUserDetails (impl. UserDetails)
 
 | Context                                        | Use `CustomUserDetails`                  | Use `User` entity                                    |

@@ -3,7 +3,7 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-src/main/resources/keys/**
+src/main/java/fr/hb/mlang/hotel/auth/keys/**
 
 ### STS ###
 .apt_generated

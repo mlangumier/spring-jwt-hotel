@@ -1,5 +1,6 @@
-package fr.hb.mlang.hotel.user.domain;
+package fr.hb.mlang.hotel.user.security;
 
+import fr.hb.mlang.hotel.user.domain.User;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;

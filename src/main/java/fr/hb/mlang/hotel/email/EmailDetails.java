@@ -1,5 +1,6 @@
 package fr.hb.mlang.hotel.email;
 
+import fr.hb.mlang.hotel.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
@@ -13,7 +14,7 @@ import lombok.Setter;
 public class EmailDetails {
 
   @NonNull
-  private String recipient;
+  private User recipient;
 
   @NonNull
   private String subject;

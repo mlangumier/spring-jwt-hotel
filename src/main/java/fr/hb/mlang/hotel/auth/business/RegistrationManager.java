@@ -18,21 +18,37 @@ public class RegistrationManager {
   private final PasswordEncoder encoder;
   private final AuthMapper mapper;
 
+  /**
+   * Prepares the new {@link User} with credentials and data from the registration form and
+   * pre-verification data.
+   *
+   * @param request DTO containing data from the registration form
+   * @return the newly created User ready to be persisted
+   */
   public User prepareNewUser(RegisterRequestDTO request) {
-    if (userRepository.findByEmail(request.email()).isPresent()) {
+    if (userRepository.findByEmail(request.getEmail()).isPresent()) {
       throw new IllegalArgumentException("Email already in use");
     }
 
     User user = mapper.toUser(request);
-    user.setPassword(encoder.encode(request.password()));
+    user.setPassword(encoder.encode(request.getPassword()));
     user.setRole(Role.USER);
     user.setValidated(false);
 
     return user;
   }
 
+  /**
+   * Checks that the email corresponds to an existing {@link User} and sets their account to
+   * "validated".
+   *
+   * @param email Email of the user we want to verify
+   * @return the now verified <code>User</code>
+   */
   public User verifyUser(String email) {
-    User user = userRepository.findByEmail(email).orElseThrow(() -> new VerifyTokenException("Account is already verified"));
+    User user = userRepository
+        .findByEmail(email)
+        .orElseThrow(() -> new VerifyTokenException("Account is already verified"));
 
     if (user.isValidated()) {
       throw new VerifyTokenException("Account is already verified");

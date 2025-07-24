@@ -1,5 +1,6 @@
 package fr.hb.mlang.hotel.auth;
 
+import fr.hb.mlang.hotel.auth.business.LoginManager;
 import fr.hb.mlang.hotel.auth.business.RegistrationManager;
 import fr.hb.mlang.hotel.auth.dto.AuthResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.LoginRequestDTO;
@@ -12,9 +13,6 @@ import fr.hb.mlang.hotel.user.security.CustomUserDetails;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,8 +21,8 @@ public class AuthServiceImpl implements AuthService {
 
   private final EmailService emailService;
   private final RegistrationManager registrationManager;
+  private final LoginManager loginManager;
   private final JwtProvider jwtProvider;
-  private final AuthenticationManager authManager;
 
   @Override
   public AuthResponseDTO register(RegisterRequestDTO request) {
@@ -49,12 +47,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public LoginResponseDTO login(LoginRequestDTO credentials) {
-    Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(
-        credentials.getEmail(),
-        credentials.getPassword()
-    ));
-    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
+    CustomUserDetails userDetails = loginManager.authenticateUser(credentials);
     String token = jwtProvider.generateToken(userDetails.getUsername());
 
     return new LoginResponseDTO(token, userDetails);

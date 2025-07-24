@@ -27,5 +27,5 @@ spring.mail.password=<my-gmail-app-password>
 ## TODO: Improvements & best practices
 
 - [ ] Refactor files to follow SOLID principles as much as possible
-- [ ] Set up role-based routes
+- [ ] Set up role-based routes & authorizations
 - [ ] Continue basic CRUD routes & security

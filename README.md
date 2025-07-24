@@ -1,7 +1,7 @@
 # Hotel management app
 
-A small application that manages users authentication with JWT, and allows users to book hotel
-rooms.
+**Description**: Basis of an app that allows for users to book hotel rooms.
+**Features**: Authentication and sessions with JWT & Spring Security.
 
 ## Setup
 
@@ -26,12 +26,6 @@ spring.mail.password=<my-gmail-app-password>
 
 ## TODO: Improvements & best practices
 
-### (rework) User (entity) vs CustomUserDetails (impl. UserDetails)
-
-| Context                                        | Use `CustomUserDetails`                  | Use `User` entity                                    |
-|------------------------------------------------|------------------------------------------|------------------------------------------------------|
-| **Spring Security Authentication**             | ✅ Yes (required by `UserDetailsService`) | 🚫 No                                                |
-| **`UserDetailsService.loadUserByUsername()`**  | ✅ Yes (return `CustomUserDetails`)       | 🚫 No                                                |
-| **Token generation (JWT)**                     | Can use `CustomUserDetails`, but…        | ✅ Yes (recommended for payload, e.g. subject, roles) |
-| **Registration / Business Logic / DB queries** | 🚫 No                                    | ✅ Yes                                                |
-| **Token decoding and verification**            | 🔄 Usually map decoded token to a `User` | ✅ Yes                                                |
+- [ ] Refactor files to follow SOLID principles as much as possible
+- [ ] Set up role-based routes
+- [ ] Continue basic CRUD routes & security

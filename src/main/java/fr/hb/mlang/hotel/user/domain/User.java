@@ -34,8 +34,8 @@ public class User {
   @Enumerated(EnumType.STRING)
   private Role role;
 
-  @Column(name = "is_validated", nullable = false)
-  private boolean validated;
+  @Column(name = "is_verified", nullable = false)
+  private boolean verified;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Booking> bookings = new ArrayList<>();

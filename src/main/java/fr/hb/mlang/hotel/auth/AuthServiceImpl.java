@@ -5,11 +5,9 @@ import fr.hb.mlang.hotel.auth.dto.AuthResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.LoginRequestDTO;
 import fr.hb.mlang.hotel.auth.dto.LoginResponseDTO;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequestDTO;
-import fr.hb.mlang.hotel.email.EmailDetails;
 import fr.hb.mlang.hotel.email.EmailService;
 import fr.hb.mlang.hotel.security.jwt.JwtProvider;
 import fr.hb.mlang.hotel.user.domain.User;
-import fr.hb.mlang.hotel.user.UserRepository;
 import fr.hb.mlang.hotel.user.security.CustomUserDetails;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  private final UserRepository userRepository;
   private final EmailService emailService;
   private final RegistrationManager registrationManager;
   private final JwtProvider jwtProvider;
@@ -31,28 +28,21 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public AuthResponseDTO register(RegisterRequestDTO request) {
-    User user = registrationManager.prepareNewUser(request);
-    userRepository.save(user);
+    User user = registrationManager.createUser(request);
 
     // Set token duration to 7 days
     String token = jwtProvider.generateToken(user.getEmail(), Instant.now().plus(7, ChronoUnit.DAYS));
 
-    String verificationMailContent = emailService.getVerificationMailContent(token);
-    emailService.sendEmail(new EmailDetails(
-        user,
-        "Welcome to JWT-Hotel",
-        verificationMailContent
-    ));
+    emailService.sendVerificationEmail(user, token);
 
     return new AuthResponseDTO("User created; confirmation email sent");
   }
 
   @Override
   public AuthResponseDTO verifyAccount(String token) {
-    User user = (User) jwtProvider.validateToken(token);
+    String userEmail = jwtProvider.extractEmail(token);
 
-    User verifiedUser = registrationManager.verifyUser(user.getEmail());
-    userRepository.save(verifiedUser);
+    registrationManager.verifyUser(userEmail);
 
     return new AuthResponseDTO("Account successfully verified!");
   }

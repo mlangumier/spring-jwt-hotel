@@ -37,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
     String token = authorizationHeader.substring("Bearer ".length());
 
     try {
-      UserDetails userDetails = jwtProvider.validateToken(token);
+      UserDetails userDetails = jwtProvider.verifyToken(token);
 
       Authentication authentication = new UsernamePasswordAuthenticationToken(
           userDetails,

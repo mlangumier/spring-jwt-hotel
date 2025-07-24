@@ -1,35 +1,31 @@
-### Variables (change when relevant)
-@baseUrl = http://localhost:8080/api/v1
-@userEmail = viyof62734@dariolo.com
-@userPassword = password
-@validationToken = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2aXlvZjYyNzM0QGRhcmlvbG8uY29tIiwiZXhwIjoxNzUzMzUxODQwfQ.bfwx7IEJqRTAtPlzyrq-im7qTzg8-sXm-CNtn9rAjFEfnpUvThsBFoe0zj4tQzF8hty4habXqvb2DewqNVig8YRuHT9vazuO0xiuYQwIY7HjRkdQ9HtpI-YV1Iq0JgpPiKFRs3nins5JBkkjXTNS-0jz-0SprY1Y4PJG6sYmQD2jrP7gKqvNghP9yQ60e-cUQyx5Q5tUsf2j47tSohsCkBDSTmYSvnOeEvuEcw3grfaKXJIffQGI-HZLD5wsfuIAdNmtF8tRvGPWdm6IW1HFiFhEF7sRuSiRXATgvGlDyeBETzzlNiY1X4saQrQkgnrgBaOJf99Nx90_vVHfb53niiUtqfNY5jxJObCIDpV8zVk8PaIXdKI134faZHktPh1CuSpft7Oj-nJbzgdMUZ4huvTF1M7SKrVKHRh_LfCWgZa0e9f8uKXo2DAkbACbaIeKK4zMs6VSNQeDWqbaY6dw875F6PSeMjOqEqaqxKeNcFt7HpOMLC6vqnIZWY9_p9Ak
-@bearerToken = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2aXlvZjYyNzM0QGRhcmlvbG8uY29tIiwiZXhwIjoxNzUzMzUyMDQxfQ.ih5y1bH9uxa6Z1jRFwxXkK9HHjS8Jho-eQoJSiHUkj5ckuWuvGp-nX4seQUEG2KChiekSlSfJJbvz13j5z8lNk3RVhpCeEhNxCt905umblW_nrAIFFlgrvpmYSZWXY6vumSgSbbbG1eb-7sI49SoIThHY1yD-erGD7iL4SYHXpaD6iVMqUnWUxeqZymOpbTZbOSlifF9oibDQKsd11p1Hsmql2xoJPM9XL9FmT57YxsZC-k2P_kFj-rJSp-8GmCySEr8wnscbeZ4U2M11tkIl4vhUTBq4_V5xxP73nm-ELe9-eu4QVlklxBawnP1ZwBVgn20bLyYNYj-yI7X-oGyScHcibB5uzJiC6G6yS8O_69XviqgqAYU1YcDP0TqhIK4NQO9SxNYgjNFldZ2Dq_qyJ4EBLw_PncUVncNea9L_vTbMT30daT83Xm_nYUWA3eraRE-n4YRVQOFY2EHDDJyazsbwWa_pICkHD_FA7QwIE7d2OixkFrTYiJ4S7TxNPQL
-
 ### Register a new User & send validation email (with body)
-POST {{baseUrl}}/register
+POST {{base_url}}/register
 Content-Type: application/json
 
 {
-  "email": "{{userEmail}}",
-  "password": "{{userPassword}}"
+  "email": "{{user.email}}",
+  "password": "{{user.password}}"
 }
 
-### Validate a user with their email
-GET {{baseUrl}}/verify?token={{validationToken}}
+### Validate a user using the activation link in the email received after registration
+GET {{base_url}}/verify?token={{user.verify_token}}
 
-### Login
-POST {{baseUrl}}/login
+### Login + creates an IntelliJ variable "auth_token" for next requests
+POST {{base_url}}/login
 Content-Type: application/json
 
 {
-  "email": "{{userEmail}}",
-  "password": "{{userPassword}}"
+  "email": "{{user.email}}",
+  "password": "{{user.password}}"
 }
+
+> {% client.global.set("access_token", response.body.token); %}
 
 ### Logout
-GET {{baseUrl}}/logout
-Authorization: Bearer {{bearerToken}}
+GET {{base_url}}/logout
+Authorization: Bearer {{access_token}}
 
 ### (remove later) Protected route for authenticated user:
-GET {{baseUrl}}/protected
-Authorization: Bearer {{bearerToken}}
+GET {{base_url}}/protected
+Authorization: Bearer {{access_token}}
+

@@ -1,6 +1,7 @@
 package fr.hb.mlang.hotel.email;
 
 import fr.hb.mlang.hotel.email.exception.EmailSendingException;
+import fr.hb.mlang.hotel.user.domain.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
       MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
       helper.setFrom(sender);
-      helper.setTo(email.getRecipient());
+      helper.setTo(email.getRecipient().getEmail());
       helper.setSubject(email.getSubject());
       helper.setText(email.getMessageBody(), true);
 
@@ -41,11 +42,20 @@ public class EmailServiceImpl implements EmailService {
   }
 
   @Override
-  public String getVerificationMailContent(String jwtToken) {
+  public void sendVerificationEmail(User user, String token) {
+    String verificationMailContent = this.prepareVerificationEmailContent(token);
+
+    EmailDetails emailDetails = new EmailDetails(user,"Welcome to JWT-Hotel",verificationMailContent);
+
+    this.sendEmail(emailDetails);
+  }
+
+  @Override
+  public String prepareVerificationEmailContent(String jwtToken) {
     Context context = new Context();
 
     String serverUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
-    String verificationUrl = serverUrl + "/api/v1/auth/verify/" + jwtToken;
+    String verificationUrl = serverUrl + "/api/v1/verify/" + jwtToken;
 
     context.setVariable("verificationUrl", verificationUrl);
     return templateEngine.process("user-verify", context);

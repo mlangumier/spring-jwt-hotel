@@ -6,6 +6,7 @@ import fr.hb.mlang.hotel.auth.exception.VerifyTokenException;
 import fr.hb.mlang.hotel.user.domain.Role;
 import fr.hb.mlang.hotel.user.domain.User;
 import fr.hb.mlang.hotel.user.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,13 @@ public class RegistrationManager {
   private final AuthMapper mapper;
 
   /**
-   * Prepares the new {@link User} with credentials and data from the registration form and
-   * pre-verification data.
+   * Creates a new {@link User} with the credentials from the registration form and pre-verification
+   * data.
    *
    * @param request DTO containing data from the registration form
-   * @return the newly created User ready to be persisted
+   * @return the newly created <code>User</code>
    */
-  public User prepareNewUser(RegisterRequestDTO request) {
+  public User createUser(RegisterRequestDTO request) {
     if (userRepository.findByEmail(request.getEmail()).isPresent()) {
       throw new IllegalArgumentException("Email already in use");
     }
@@ -33,9 +34,9 @@ public class RegistrationManager {
     User user = mapper.toUser(request);
     user.setPassword(encoder.encode(request.getPassword()));
     user.setRole(Role.USER);
-    user.setValidated(false);
+    user.setVerified(false);
 
-    return user;
+    return userRepository.save(user);
   }
 
   /**
@@ -43,18 +44,17 @@ public class RegistrationManager {
    * "validated".
    *
    * @param email Email of the user we want to verify
-   * @return the now verified <code>User</code>
    */
-  public User verifyUser(String email) {
+  public void verifyUser(String email) {
     User user = userRepository
         .findByEmail(email)
-        .orElseThrow(() -> new VerifyTokenException("Account is already verified"));
+        .orElseThrow(() -> new EntityNotFoundException("Couldn't find user with email: " + email));
 
-    if (user.isValidated()) {
+    if (user.isVerified()) {
       throw new VerifyTokenException("Account is already verified");
     }
 
-    user.setValidated(true);
-    return user;
+    user.setVerified(true);
+    userRepository.save(user);
   }
 }

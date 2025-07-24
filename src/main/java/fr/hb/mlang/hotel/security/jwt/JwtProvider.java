@@ -21,7 +21,7 @@ public class JwtProvider {
   private final JwtKeyManager jwtKeyManager;
 
   /**
-   * Generates a <code>JWT</code> using the {@link User}'s email.
+   * Generates a <code>JWT</code> containing the {@link User}'s email.
    *
    * @param email Email of the user who will get the token
    * @return the generated <code>JWT</code>
@@ -29,12 +29,28 @@ public class JwtProvider {
   public String generateToken(String email) {
     return JWT.create()
         .withSubject(email)
-        .withExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
+        .withExpiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
+        .sign(jwtKeyManager.getAlgorithm());
+  }
+
+  /**
+   * Generates a <code>JWT</code> containing the {@link User}'s email.
+   *
+   * @param email           Email of the user who will get the token
+   * @param tokenExpiration Expiration time and date of the token
+   * @return the generated <code>JWT</code>
+   */
+  public String generateToken(String email, Instant tokenExpiration) {
+    return JWT
+        .create()
+        .withSubject(email)
+        .withExpiresAt(tokenExpiration)
         .sign(jwtKeyManager.getAlgorithm());
   }
 
   /**
    * Checks if a <code>JWT</code> is valid and corresponds to a {@link User}.
+   *
    * @param token String token to check
    * @return the <code>User</code> associated to the token
    */

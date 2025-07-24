@@ -11,6 +11,8 @@ import fr.hb.mlang.hotel.user.domain.CustomUserDetails;
 import fr.hb.mlang.hotel.security.jwt.JwtProvider;
 import fr.hb.mlang.hotel.user.domain.User;
 import fr.hb.mlang.hotel.user.UserRepository;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,10 +33,18 @@ public class AuthServiceImpl implements AuthService {
     User user = registrationManager.prepareNewUser(request);
     userRepository.save(user);
 
-    String token = jwtProvider.generateToken(user.getEmail());
+    // Set token duration to 7 days
+    String token = jwtProvider.generateToken(
+        user.getEmail(),
+        Instant.now().plus(7, ChronoUnit.DAYS)
+    );
+
     String verificationMailContent = emailService.getVerificationMailContent(token);
-    emailService.sendEmail(
-        new EmailDetails(user.getEmail(), "Welcome to JWT-Hotel", verificationMailContent));
+    emailService.sendEmail(new EmailDetails(
+        user.getEmail(),
+        "Welcome to JWT-Hotel",
+        verificationMailContent
+    ));
 
     return new AuthResponseDTO("User created; confirmation email sent");
   }
@@ -51,10 +61,12 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public LoginResponseDTO login(LoginRequestDTO credentials) {
-    CustomUserDetails userDetails = (CustomUserDetails) authManager.authenticate(new UsernamePasswordAuthenticationToken(
-        credentials.getEmail(),
-        credentials.getPassword()
-    )).getPrincipal();
+    CustomUserDetails userDetails = (CustomUserDetails) authManager
+        .authenticate(new UsernamePasswordAuthenticationToken(
+            credentials.getEmail(),
+            credentials.getPassword()
+        ))
+        .getPrincipal();
 
     String token = jwtProvider.generateToken(userDetails.getUsername());
     return new LoginResponseDTO(token, userDetails);

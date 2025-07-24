@@ -32,10 +32,10 @@ public class RegistrationManager {
   }
 
   public User verifyUser(String email) {
-    User user = userRepository.findByEmail(email).orElseThrow(() -> new VerifyTokenException("Account already verified"));
+    User user = userRepository.findByEmail(email).orElseThrow(() -> new VerifyTokenException("Account is already verified"));
 
     if (user.isValidated()) {
-      throw new VerifyTokenException("User is already verified");
+      throw new VerifyTokenException("Account is already verified");
     }
 
     user.setValidated(true);

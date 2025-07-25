@@ -31,7 +31,7 @@ public class RegistrationManager {
       throw new IllegalArgumentException("Email already in use");
     }
 
-    User user = mapper.toUser(request);
+    User user = mapper.fromRegisterRequestDTOtoUser(request);
     user.setPassword(encoder.encode(request.getPassword()));
     user.setRole(Role.USER);
     user.setVerified(false);

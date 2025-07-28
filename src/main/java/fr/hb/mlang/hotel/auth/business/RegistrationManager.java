@@ -31,10 +31,14 @@ public class RegistrationManager {
       throw new IllegalArgumentException("Email already in use");
     }
 
-    User user = mapper.fromRegisterRequestDTOtoUser(request);
-    user.setPassword(encoder.encode(request.getPassword()));
-    user.setRole(Role.USER);
-    user.setVerified(false);
+    User user = User
+        .builder()
+        .email(request.getEmail())
+        .password(encoder.encode(request.getPassword()))
+        .role(Role.USER)
+        .verified(false)
+        .build()
+        ;
 
     return userRepository.save(user);
   }

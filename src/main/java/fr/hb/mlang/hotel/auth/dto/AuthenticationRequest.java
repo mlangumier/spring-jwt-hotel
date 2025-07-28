@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
+public class AuthenticationRequest {
 
   @Email
   @NotBlank
-  String email;
+  private String email;
 
   @NotBlank
   @Size(min = 6, max = 64)
-  String password;
+  private String password;
 }

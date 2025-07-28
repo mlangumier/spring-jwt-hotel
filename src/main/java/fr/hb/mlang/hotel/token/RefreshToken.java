@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.auth.token;
+package fr.hb.mlang.hotel.token;
 
 import fr.hb.mlang.hotel.user.domain.User;
 import jakarta.persistence.Column;

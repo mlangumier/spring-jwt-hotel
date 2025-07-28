@@ -20,7 +20,6 @@ public class SecurityConfig {
   private final AuthenticationProvider authenticationProvider;
   private final LogoutHandler logoutHandler;
 
-
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
@@ -29,7 +28,7 @@ public class SecurityConfig {
         // Manages routes authorizations
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             // Public routes (whitelisted)
-            .requestMatchers("").permitAll()
+            .requestMatchers("/api/v1/auth/**").permitAll()
             // Private routes (authenticated only)
             .anyRequest().authenticated())
         // Prevents Spring Security from managing sessions ()

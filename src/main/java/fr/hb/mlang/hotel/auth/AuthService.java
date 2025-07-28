@@ -1,23 +1,28 @@
 package fr.hb.mlang.hotel.auth;
 
+import fr.hb.mlang.hotel.auth.dto.AuthenticationRequest;
 import fr.hb.mlang.hotel.auth.dto.AuthenticationResponse;
-import fr.hb.mlang.hotel.auth.dto.LoginRequest;
-import fr.hb.mlang.hotel.auth.dto.LoginResponse;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequest;
-import fr.hb.mlang.hotel.auth.dto.TokenPairDTO;
 import fr.hb.mlang.hotel.user.domain.User;
 
 public interface AuthService {
 
   AuthenticationResponse register(RegisterRequest request);
 
+  //TODO: requires an update
   AuthenticationResponse verifyAccount(String verificationToken);
 
-  LoginResponse login(LoginRequest credentials);
+  /**
+   * Authenticates the {@link User} after verifying their credentials.
+   *
+   * @param request The user's credentials
+   * @return the generated access token
+   */
+  AuthenticationResponse authenticate(AuthenticationRequest request);
 
-  TokenPairDTO refreshToken(String refreshToken);
+  //TokenPairDTO refreshToken(String refreshToken);
 
-  void resetPassword(String email);
+  //void resetPassword(String email);
 
-  void deleteAccount(User user);
+  //void deleteAccount(User user);
 }

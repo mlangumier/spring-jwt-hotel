@@ -1,6 +1,5 @@
 package fr.hb.mlang.hotel.security;
 
-import fr.hb.mlang.hotel.auth.token.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.internal.Function;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,10 +20,7 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
   @Value("${jwt.secret.key}")
-  private static String SECRET_KEY;
-
-  private final UserDetailsService userDetailsService;
-  private final RefreshTokenRepository refreshTokenRepository;
+  private String secretKey;
 
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -46,7 +41,7 @@ public class JwtService {
   }
 
   private Key getSignInKey() {
-    byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+    byte[] keyBytes = Decoders.BASE64.decode(secretKey);
     return Keys.hmacShaKeyFor(keyBytes);
   }
 

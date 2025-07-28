@@ -1,7 +1,7 @@
 package fr.hb.mlang.hotel.auth.business;
 
-import fr.hb.mlang.hotel.auth.token.RefreshToken;
-import fr.hb.mlang.hotel.auth.token.RefreshTokenRepository;
+import fr.hb.mlang.hotel.token.RefreshToken;
+import fr.hb.mlang.hotel.token.RefreshTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

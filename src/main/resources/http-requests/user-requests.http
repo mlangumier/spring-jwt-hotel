@@ -1,4 +1,5 @@
 ### GET users
 GET {{base_url}}/users
+Authorization: "Bearer {{access_token}}
 
 ###

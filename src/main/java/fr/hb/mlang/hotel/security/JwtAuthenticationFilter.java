@@ -1,6 +1,5 @@
-package fr.hb.mlang.hotel.security.filter;
+package fr.hb.mlang.hotel.security;
 
-import fr.hb.mlang.hotel.security.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,17 +8,23 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Interceptor that applies filters to our HTTP requests. Reads the <code>request</code> and manages
+ * the <code>response</code>.
+ */
 @Component
 @RequiredArgsConstructor
-public class JwtFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final JwtProvider jwtProvider;
+  private final JwtService jwtService;
+  private final UserDetailsService userDetailsService;
 
   @Override
   protected void doFilterInternal(
@@ -37,20 +42,21 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     accessToken = authHeader.substring("Bearer ".length());
-    userEmail = jwtProvider.extractEmailFromToken(accessToken);
+    userEmail = jwtService.extractUsername(accessToken);
 
     if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails userDetails = jwtProvider.verifyAccessToken(accessToken);
+      UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-      //TODO: check token expiredAt?
+      if (jwtService.isTokenValid(accessToken, userDetails)) {
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+            userDetails,
+            null,
+            userDetails.getAuthorities()
+        );
 
-      Authentication authToken = new UsernamePasswordAuthenticationToken(
-          userDetails,
-          null,
-          userDetails.getAuthorities()
-      );
-
-      SecurityContextHolder.getContext().setAuthentication(authToken);
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+      }
     }
 
     filterChain.doFilter(request, response);

@@ -27,7 +27,7 @@ public class RegistrationManager {
    * @return the newly created <code>User</code>
    */
   public User createUser(RegisterRequest request) {
-    if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+    if (userRepository.existsByEmail(request.getEmail())) {
       throw new IllegalArgumentException("Email already in use");
     }
 

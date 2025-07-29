@@ -19,12 +19,12 @@ Content-Type: application/json
   "password": "{{user.password}}"
 }
 
-> {% client.global.set("token", response.body.token); %}
+> {% client.global.set("access_token", response.body.accessToken); %}
 
 ### Logout
 GET {{base_url}}/auth/logout
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
-### Get all users (authed)
+### Get all users
 GET {{base_url}}/users
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}

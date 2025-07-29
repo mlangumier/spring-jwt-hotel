@@ -1,8 +1,11 @@
 package fr.hb.mlang.hotel.user.domain;
 
 import fr.hb.mlang.hotel.booking.Booking;
+import fr.hb.mlang.hotel.security.token.RefreshToken;
 import jakarta.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

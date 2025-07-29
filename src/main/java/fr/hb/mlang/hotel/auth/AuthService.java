@@ -7,7 +7,7 @@ import fr.hb.mlang.hotel.user.domain.User;
 
 public interface AuthService {
 
-  AuthenticationResponse register(RegisterRequest request);
+  void register(RegisterRequest request);
 
   //TODO: requires an update
   AuthenticationResponse verifyAccount(String verificationToken);

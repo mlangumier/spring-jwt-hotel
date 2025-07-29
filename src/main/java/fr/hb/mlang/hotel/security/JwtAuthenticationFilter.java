@@ -36,18 +36,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     final String accessToken;
     final String userEmail;
 
+    System.err.println("> Enter Authentication Filter");
+
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      System.err.println("> Not authentication token provided");
       filterChain.doFilter(request, response);
       return;
     }
 
     accessToken = authHeader.substring("Bearer ".length());
-    userEmail = jwtService.extractUsername(accessToken);
+    userEmail = jwtService.extractUsernameFromToken(accessToken);
 
     if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+      System.err.println("> User found & not authenticated");
       UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
       if (jwtService.isTokenValid(accessToken, userDetails)) {
+        System.err.println("> Access token valid for found user");
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
             userDetails,
             null,
@@ -57,9 +62,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
+        System.err.println("> User authenticated successfully");
       }
     }
 
     filterChain.doFilter(request, response);
+    System.err.println("> Exit authentication filter");
   }
 }

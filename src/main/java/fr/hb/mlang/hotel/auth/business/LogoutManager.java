@@ -1,11 +1,13 @@
 package fr.hb.mlang.hotel.auth.business;
 
-import fr.hb.mlang.hotel.token.RefreshToken;
-import fr.hb.mlang.hotel.token.RefreshTokenRepository;
+import fr.hb.mlang.hotel.security.JwtService;
+import fr.hb.mlang.hotel.security.token.RefreshToken;
+import fr.hb.mlang.hotel.security.token.RefreshTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -16,26 +18,31 @@ import org.springframework.stereotype.Service;
 public class LogoutManager implements LogoutHandler {
 
   private final RefreshTokenRepository refreshTokenRepository;
+  private final JwtService jwtService;
 
   @Override
   public void logout(
-      HttpServletRequest request,
-      HttpServletResponse response,
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
       Authentication authentication
   ) {
     final String authHeader = request.getHeader("Authorization");
-    final String token;
+    final String accessToken;
+    final String userEmail;
+    System.err.println("> Authentication: " + authentication);
 
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      return;
+    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+      accessToken = authHeader.substring("Bearer ".length());
+
+      try {
+        userEmail = jwtService.extractUsernameFromToken(accessToken);
+
+        List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUserEmail(userEmail);
+        refreshTokenRepository.deleteAll(refreshTokens);
+      } catch (Exception e) {
+        System.err.println("Failed to revoke refresh tokens: " + e.getMessage());
+      }
     }
-
-    token = authHeader.substring(7);
-    RefreshToken refreshToken = refreshTokenRepository
-        .findByToken(token)
-        .orElseThrow(() -> new AuthorizationDeniedException("Invalid token"));
-
-    refreshTokenRepository.delete(refreshToken);
 
     SecurityContextHolder.clearContext();
   }

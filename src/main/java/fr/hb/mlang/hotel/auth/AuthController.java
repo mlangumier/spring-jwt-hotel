@@ -1,9 +1,9 @@
 package fr.hb.mlang.hotel.auth;
 
+import fr.hb.mlang.hotel.auth.business.LogoutManager;
 import fr.hb.mlang.hotel.auth.dto.AuthenticationRequest;
 import fr.hb.mlang.hotel.auth.dto.AuthenticationResponse;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequest;
-import fr.hb.mlang.hotel.security.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthServiceImpl authService;
-  private final JwtService jwtService;
+  private final LogoutManager logoutManager;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthenticationResponse> register(@Valid @RequestBody RegisterRequest request) {
-    AuthenticationResponse response = authService.register(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
+    authService.register(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
   }
 
   @GetMapping("/verify")
@@ -36,8 +36,8 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody AuthenticationRequest credentials) {
-    AuthenticationResponse response = authService.authenticate(credentials);
+  public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody AuthenticationRequest request) {
+    AuthenticationResponse response = authService.authenticate(request);
 
     //TODO: "SOLID"
     //RefreshToken refreshToken = jwtService.createRefreshToken(response.userDetails());
@@ -51,6 +51,12 @@ public class AuthController {
         .status(HttpStatus.ACCEPTED)
         //.header(HttpHeaders.SET_COOKIE, cookie.toString())
         .body(response); //WARNING: transform `LoginResponse.userDetails` into `LoginResponse.userDTO`: remove sensitive data (ex: password)
+  }
+
+  @PostMapping("/refresh-token")
+  public ResponseEntity<AuthenticationResponse> refreshToken(@RequestParam("refresh_token") String refreshTokenId) {
+    AuthenticationResponse response = authService.refreshToken(refreshTokenId);
+    return ResponseEntity.ok(response);
   }
 
   //@PostMapping("/refresh-token")
@@ -75,5 +81,12 @@ public class AuthController {
   //  } catch (Exception e) {
   //    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
   //  }
+  //}
+
+  //@PostMapping("/logout")
+  //public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+  //  logoutManager.logout(request, response, authentication);
+  //
+  //  return ResponseEntity.ok("User logout successfully!");
   //}
 }

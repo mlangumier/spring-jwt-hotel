@@ -1,11 +1,15 @@
 package fr.hb.mlang.hotel.auth;
 
-import fr.hb.mlang.hotel.auth.business.LogoutManager;
-import fr.hb.mlang.hotel.auth.dto.AuthenticationRequest;
-import fr.hb.mlang.hotel.auth.dto.AuthenticationResponse;
+import fr.hb.mlang.hotel.auth.dto.JwtTokensDto;
+import fr.hb.mlang.hotel.auth.dto.LoginRequest;
+import fr.hb.mlang.hotel.auth.dto.LoginResponse;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequest;
+import fr.hb.mlang.hotel.security.CookieUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthServiceImpl authService;
-  private final LogoutManager logoutManager;
 
   @PostMapping("/register")
   public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
@@ -30,63 +33,44 @@ public class AuthController {
   }
 
   @GetMapping("/verify")
-  public ResponseEntity<AuthenticationResponse> verify(@RequestParam("token") String token) {
-    AuthenticationResponse response = authService.verifyAccount(token);
-    return ResponseEntity.ok(response);
+  public ResponseEntity<String> verify(@RequestParam("token") String token) {
+    authService.verifyAccount(token);
+    return ResponseEntity.ok("User verified successfully!");
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody AuthenticationRequest request) {
-    AuthenticationResponse response = authService.authenticate(request);
+  public ResponseEntity<LoginResponse> login(
+      @Valid @RequestBody LoginRequest request,
+      HttpServletResponse response
+  ) {
+    JwtTokensDto tokens = authService.authenticate(request, response);
 
-    //TODO: "SOLID"
-    //RefreshToken refreshToken = jwtService.createRefreshToken(response.userDetails());
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()).toString()
+    );
 
-    //Cookie cookie = new Cookie("refresh_token", refreshToken.getToken());
-    //cookie.setHttpOnly(true);
-    //cookie.setSecure(false); // Set to {true} for HTTPS setup
-    //cookie.setPath("/api/v1/auth/refresh-token");
-
-    return ResponseEntity
-        .status(HttpStatus.ACCEPTED)
-        //.header(HttpHeaders.SET_COOKIE, cookie.toString())
-        .body(response); //WARNING: transform `LoginResponse.userDetails` into `LoginResponse.userDTO`: remove sensitive data (ex: password)
+    return ResponseEntity.ok(LoginResponse.builder().accessToken(tokens.getAccessToken()).build());
   }
 
-  @PostMapping("/refresh-token")
-  public ResponseEntity<AuthenticationResponse> refreshToken(@RequestParam("refresh_token") String refreshTokenId) {
-    AuthenticationResponse response = authService.refreshToken(refreshTokenId);
-    return ResponseEntity.ok(response);
+  @PostMapping("/refresh")
+  public ResponseEntity<LoginResponse> refreshToken(
+      HttpServletRequest request,
+      HttpServletResponse response
+  ) {
+    JwtTokensDto tokens = authService.refreshToken(request);
+
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()).toString()
+    );
+
+    return ResponseEntity.ok(LoginResponse.builder().accessToken(tokens.getAccessToken()).build());
   }
 
-  //@PostMapping("/refresh-token")
-  //public ResponseEntity<String> refreshToken(@CookieValue(name = "refresh_token") String refreshToken) {
-  //  if (refreshToken == null) {
-  //    throw new RuntimeException("No refresh token provided");
-  //  }
-  //
-  //  try {
-  //    TokenPairDTO tokens = authService.refreshToken(refreshToken);
-  //
-  //    //TODO: "SOLID"
-  //    Cookie cookie = new Cookie("refresh_token", tokens.refreshToken());
-  //    cookie.setHttpOnly(true);
-  //    cookie.setSecure(false); // Set to {true} is using an HTTPS setup
-  //    cookie.setPath("/api/v1/auth/refresh-accessToken");
-  //
-  //    return ResponseEntity
-  //        .status(HttpStatus.ACCEPTED)
-  //        .header(HttpHeaders.SET_COOKIE, cookie.toString())
-  //        .body(tokens.accessToken());
-  //  } catch (Exception e) {
-  //    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
-  //  }
-  //}
-
-  //@PostMapping("/logout")
-  //public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-  //  logoutManager.logout(request, response, authentication);
-  //
-  //  return ResponseEntity.ok("User logout successfully!");
-  //}
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    authService.logout(request, response);
+    return ResponseEntity.noContent().build();
+  }
 }

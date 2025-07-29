@@ -5,10 +5,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.ValidationException;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.internal.Function;
@@ -22,9 +24,11 @@ public class JwtService {
   @Value("${app.jwt.secret.key}")
   private String secretKey;
 
-  @Value("${app.jwt.expiration}")
+  @Getter
+  @Value("${app.jwt.access.expiration}")
   private long jwtExpiration;
 
+  @Getter
   @Value("${app.jwt.refresh.expiration}")
   private long refreshTokenExpiration;
 
@@ -58,10 +62,16 @@ public class JwtService {
   }
 
   public String extractUsernameFromToken(String token) {
+    if (token == null || token.isBlank()) {
+      throw new ValidationException("Token is missing or empty");
+    }
     return extractClaim(token, Claims::getSubject);
   }
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
+    if (token == null || token.isBlank()) {
+      throw new ValidationException("Token is missing or empty");
+    }
     final String username = this.extractUsernameFromToken(token);
 
     return (username.equals(userDetails.getUsername())) && !this.isTokenExpired(token);

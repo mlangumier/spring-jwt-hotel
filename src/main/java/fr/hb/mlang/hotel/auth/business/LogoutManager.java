@@ -13,6 +13,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+/**
+ * Logs out the user by revoking their tokens. Works with Spring SecurityFilterChain: `http.logout`
+ * default method.
+ *
+ * @deprecated since setting up cookie-based authentication
+ */
+//@Deprecated(since = "Cookie-based authentication", forRemoval = true)
 @Service
 @RequiredArgsConstructor
 public class LogoutManager implements LogoutHandler {

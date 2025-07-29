@@ -26,7 +26,7 @@ spring.mail.password=<my-gmail-app-password>
 
 ## TODO: Improvements & best practices
 
-- [ ] Rework full JWT implement for access & refresh token (new project then transfer here)
+- [x] Rework full JWT implement for access & refresh token (new project then transfer here)
 - [ ] Set up role-based routes & authorizations
 - [ ] Refactor files to follow SOLID principles as much as possible
 - [ ] Continue basic CRUD routes & security

@@ -1,16 +1,17 @@
 package fr.hb.mlang.hotel.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.ValidationException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   protected void doFilterInternal(
@@ -38,40 +40,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       @NonNull FilterChain filterChain
   ) throws ServletException, IOException {
     final String authHeader = request.getHeader("Authorization");
-    final String accessToken;
-    final String userEmail;
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       filterChain.doFilter(request, response);
       return;
     }
-    accessToken = authHeader.substring("Bearer ".length());
 
-    // Get token from Cookie
-    //accessToken = Arrays
-    //    .stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
-    //    .filter(cookie -> cookie.getName().equals(jwtAccessTokenName))
-    //    .map(Cookie::getValue)
-    //    .findFirst()
-    //    .orElse(null);
+    final String accessToken = authHeader.substring("Bearer ".length());
+    String userEmail;
 
-    userEmail = jwtService.extractUsernameFromToken(accessToken);
+    try {
+      userEmail = jwtService.extractUsernameFromToken(accessToken);
 
-    if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+      if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-      if (jwtService.isTokenValid(accessToken, userDetails)) {
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-            userDetails,
-            null,
-            userDetails.getAuthorities()
-        );
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        if (jwtService.isTokenValid(accessToken, userDetails)) {
+          UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+              userDetails,
+              null,
+              userDetails.getAuthorities()
+          );
 
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+          authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+          SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
       }
-    }
 
-    filterChain.doFilter(request, response);
+      filterChain.doFilter(request, response);
+    } catch (ExpiredJwtException e) {
+      handleJwtException(response, "Access token expired", "TOKEN_EXPIRED");
+    } catch (SignatureException | MalformedJwtException e) {
+      handleJwtException(response, "Invalid access token", "TOKEN_INVALID");
+    } catch (Exception e) {
+      handleJwtException(response, "Authentication error", "AUTH_ERROR");
+    }
+  }
+
+  private void handleJwtException(HttpServletResponse response, String message, String code)
+      throws IOException {
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    objectMapper.writeValue(response.getWriter(), Map.of("error", message, "code", code));
   }
 }

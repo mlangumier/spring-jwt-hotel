@@ -23,11 +23,10 @@ public class SecurityConfig {
         // Prevents injections trying to steal cookies (no sessions)
         .csrf(AbstractHttpConfigurer::disable)
         // Manages routes authorizations
-        .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+        .authorizeHttpRequests(auth -> auth
             // Public routes (whitelisted)
             .requestMatchers("/api/v1/auth/**").permitAll()
             // Private routes (authenticated only)
-            .requestMatchers("/api/v1/auth/login").authenticated()
             .anyRequest().authenticated())
         // Prevents Spring Security from managing sessions ()
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,10 +1,13 @@
 package fr.hb.mlang.hotel.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.validation.ValidationException;
 import java.security.Key;
 import java.util.Date;
@@ -12,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.internal.Function;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JwtService {
 
   @Value("${app.jwt.secret.key}")
@@ -47,7 +52,11 @@ public class JwtService {
     return generateToken(userDetails, refreshTokenExpiration, new HashMap<>());
   }
 
-  public String generateToken(UserDetails userDetails, long expirationInMs, Map<String, Object> extraClaims) {
+  public String generateToken(
+      UserDetails userDetails,
+      long expirationInMs,
+      Map<String, Object> extraClaims
+  ) {
     Date now = new Date();
     Date expiryDate = new Date(now.getTime() + expirationInMs);
 
@@ -88,12 +97,17 @@ public class JwtService {
   }
 
   private Claims extractAllClaims(String token) {
-    return Jwts
-        .parserBuilder()
-        .setSigningKey(this.getSignInKey())
-        .build()
-        .parseClaimsJws(token)
-        .getBody();
+    try {
+      return Jwts
+          .parserBuilder()
+          .setSigningKey(this.getSignInKey())
+          .build()
+          .parseClaimsJws(token)
+          .getBody();
+    } catch (ExpiredJwtException | SignatureException | MalformedJwtException e) {
+      log.error("Failed to extract claims: {}", e.getMessage());
+      throw e;
+    }
   }
 
   private Key getSignInKey() {

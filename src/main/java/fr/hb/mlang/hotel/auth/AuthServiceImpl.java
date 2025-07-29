@@ -1,81 +1,130 @@
 package fr.hb.mlang.hotel.auth;
 
-import fr.hb.mlang.hotel.auth.business.LoginManager;
 import fr.hb.mlang.hotel.auth.business.RegistrationManager;
-import fr.hb.mlang.hotel.auth.dto.AuthenticationResponse;
+import fr.hb.mlang.hotel.auth.dto.JwtTokensDto;
 import fr.hb.mlang.hotel.auth.dto.LoginRequest;
-import fr.hb.mlang.hotel.auth.dto.LoginResponse;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequest;
-import fr.hb.mlang.hotel.auth.dto.TokenPairDTO;
 import fr.hb.mlang.hotel.email.EmailService;
-import fr.hb.mlang.hotel.security.jwt.JwtProvider;
+import fr.hb.mlang.hotel.security.CookieUtil;
+import fr.hb.mlang.hotel.security.JwtService;
+import fr.hb.mlang.hotel.security.token.RefreshToken;
+import fr.hb.mlang.hotel.security.token.RefreshTokenRepository;
 import fr.hb.mlang.hotel.user.domain.User;
-import fr.hb.mlang.hotel.user.security.CustomUserDetails;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ValidationException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+  @Value("${app.jwt.refresh}")
+  private String jwtRefreshTokenName;
+
+  private final UserDetailsService userDetailsService;
+  private final RefreshTokenRepository refreshTokenRepository;
+  private final JwtService jwtService;
+  private final AuthenticationManager authManager;
   private final EmailService emailService;
   private final RegistrationManager registrationManager;
-  private final LoginManager loginManager;
-  private final JwtProvider jwtProvider;
-  private final AuthMapper mapper;
 
   @Override
-  public AuthenticationResponse register(RegisterRequest request) {
+  public void register(RegisterRequest request) {
     User user = registrationManager.createUser(request);
 
-    // Set accessToken duration to 30 days
-    String token = jwtProvider.generateToken(
-        user.getEmail(),
-        Instant.now().plus(30, ChronoUnit.DAYS)
-    );
+    String token = jwtService.generateVerificationToken(user);
 
     emailService.sendVerificationEmail(user, token);
-
-    return new AuthenticationResponse("User created; confirmation email sent");
   }
 
-  @Override
-  public AuthenticationResponse verifyAccount(String token) {
-    String userEmail = jwtProvider.extractEmailFromToken(token);
+  public void verifyAccount(String token) {
+    String userEmail = jwtService.extractUsernameFromToken(token);
 
     registrationManager.verifyUser(userEmail);
-
-    return new AuthenticationResponse("Account successfully verified!");
   }
 
-  @Override
-  public LoginResponse login(LoginRequest credentials) {
-    CustomUserDetails userDetails = loginManager.authenticateUser(credentials);
+  public JwtTokensDto authenticate(LoginRequest request, HttpServletResponse response) {
+    Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(
+        request.getEmail(),
+        request.getPassword()
+    ));
+    User user = (User) authentication.getPrincipal();
 
-    String accessToken = jwtProvider.createAccessToken(userDetails.getUsername());
+    String accessToken = jwtService.generateAccessToken(user);
+    String refreshToken = jwtService.generateRefreshToken(user);
 
-    return new LoginResponse(accessToken, userDetails);
+    RefreshToken refreshTokenEntity = RefreshToken
+        .builder()
+        .token(refreshToken)
+        .user(user)
+        .expiresAt(Instant.now().plusMillis(jwtService.getRefreshTokenExpiration()))
+        .build()
+        ;
+    refreshTokenRepository.save(refreshTokenEntity);
+
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtil.createRefreshTokenCookie(refreshToken).toString()
+    );
+
+    return JwtTokensDto.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
 
-  @Override
-  public TokenPairDTO refreshToken(String refreshToken) {
-    User user = jwtProvider.verifyRefreshToken(refreshToken);
-    CustomUserDetails userDetails = loginManager.authenticateUser(mapper.fromUserToLoginRequestDTO(
-        user));
+  public JwtTokensDto refreshToken(HttpServletRequest request) {
+    String refreshToken = Arrays
+        .stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+        .filter(cookie -> cookie.getName().equals(jwtRefreshTokenName))
+        .map(Cookie::getValue)
+        .findFirst()
+        .orElse(null)
+        ;
 
-    String newAccessToken = jwtProvider.createAccessToken(userDetails.getUsername());
-    return new TokenPairDTO(newAccessToken, refreshToken);
+    if (refreshToken == null || refreshToken.isBlank()) {
+      throw new ValidationException("Refresh token cookie is missing");
+    }
+
+    // Validate token structure
+    String userEmail = jwtService.extractUsernameFromToken(refreshToken);
+    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+    // Check if corresponds to a persisted entity
+    if (!jwtService.isTokenValid(refreshToken, userDetails)) {
+      throw new ValidationException("Invalid refresh token");
+    }
+
+    // Issue new access token
+    String newAccessToken = jwtService.generateAccessToken(userDetails);
+
+    return JwtTokensDto.builder().accessToken(newAccessToken).refreshToken(refreshToken).build();
   }
 
-  @Override
-  public void resetPassword(String email) {
-    //TODO:
-  }
+  public void logout(HttpServletRequest request, HttpServletResponse response) {
 
-  @Override
-  public void deleteAccount(User user) {
-    //TODO
+    Arrays
+        .stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+        .filter(cookie -> cookie.getName().equals(jwtRefreshTokenName))
+        .map(Cookie::getValue)
+        .findFirst()
+        .flatMap(refreshTokenRepository::findByToken)
+        .ifPresent(refreshTokenRepository::delete)
+    ;
+
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtil.cleanRefreshTokenCookie().toString()
+    );
   }
 }

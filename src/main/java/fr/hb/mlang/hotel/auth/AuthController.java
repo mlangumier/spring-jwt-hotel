@@ -1,27 +1,23 @@
 package fr.hb.mlang.hotel.auth;
 
-import fr.hb.mlang.hotel.auth.dto.AuthenticationResponse;
+import fr.hb.mlang.hotel.auth.dto.JwtTokensDto;
 import fr.hb.mlang.hotel.auth.dto.LoginRequest;
 import fr.hb.mlang.hotel.auth.dto.LoginResponse;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequest;
-import fr.hb.mlang.hotel.auth.dto.TokenPairDTO;
-import fr.hb.mlang.hotel.auth.token.RefreshToken;
-import fr.hb.mlang.hotel.security.jwt.JwtProvider;
-import fr.hb.mlang.hotel.user.security.CustomUserDetails;
-import jakarta.servlet.http.Cookie;
+import fr.hb.mlang.hotel.security.CookieUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -29,59 +25,52 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthController {
 
   private final AuthServiceImpl authService;
-  private final JwtProvider jwtProvider;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthenticationResponse> register(@Valid @RequestBody RegisterRequest request) {
-    AuthenticationResponse response = authService.register(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
+    authService.register(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
   }
 
   @GetMapping("/verify")
-  public ResponseEntity<AuthenticationResponse> verify(@RequestParam("token") String token) {
-    AuthenticationResponse response = authService.verifyAccount(token);
-    return ResponseEntity.ok(response);
+  public ResponseEntity<String> verify(@RequestParam("token") String token) {
+    authService.verifyAccount(token);
+    return ResponseEntity.ok("User verified successfully!");
   }
 
   @PostMapping("/login")
-  public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest credentials) {
-    LoginResponse response = authService.login(credentials);
+  public ResponseEntity<LoginResponse> login(
+      @Valid @RequestBody LoginRequest request,
+      HttpServletResponse response
+  ) {
+    JwtTokensDto tokens = authService.authenticate(request, response);
 
-    //TODO: "SOLID"
-    RefreshToken refreshToken = jwtProvider.createRefreshToken((CustomUserDetails) response.userDetails());
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()).toString()
+    );
 
-    Cookie cookie = new Cookie("refresh_token", refreshToken.getToken());
-    cookie.setHttpOnly(true);
-    cookie.setSecure(false); // Set to {true} for HTTPS setup
-    cookie.setPath("/api/v1/auth/refresh-token");
-
-    return ResponseEntity
-        .status(HttpStatus.ACCEPTED)
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
-        .body(response); //WARNING: transform `LoginResponse.userDetails` into `LoginResponse.userDTO`: remove sensitive data (ex: password)
+    return ResponseEntity.ok(LoginResponse.builder().accessToken(tokens.getAccessToken()).build());
   }
 
-  @PostMapping("/refresh-token")
-  public ResponseEntity<String> refreshToken(@CookieValue(name = "refresh_token") String refreshToken) {
-    if (refreshToken == null) {
-      throw new RuntimeException("No refresh token provided");
-    }
+  @PostMapping("/refresh")
+  public ResponseEntity<LoginResponse> refreshToken(
+      HttpServletRequest request,
+      HttpServletResponse response
+  ) {
+    JwtTokensDto tokens = authService.refreshToken(request);
 
-    try {
-      TokenPairDTO tokens = authService.refreshToken(refreshToken);
+    response.addHeader(
+        HttpHeaders.SET_COOKIE,
+        CookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()).toString()
+    );
 
-      //TODO: "SOLID"
-      Cookie cookie = new Cookie("refresh_token", tokens.refreshToken());
-      cookie.setHttpOnly(true);
-      cookie.setSecure(false); // Set to {true} is using an HTTPS setup
-      cookie.setPath("/api/v1/auth/refresh-accessToken");
+    return ResponseEntity.ok(LoginResponse.builder().accessToken(tokens.getAccessToken()).build());
+  }
 
-      return ResponseEntity
-          .status(HttpStatus.ACCEPTED)
-          .header(HttpHeaders.SET_COOKIE, cookie.toString())
-          .body(tokens.accessToken());
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
-    }
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    authService.logout(request, response);
+    return ResponseEntity.noContent().build();
   }
 }

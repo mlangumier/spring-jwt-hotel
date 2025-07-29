@@ -27,14 +27,18 @@ public class RegistrationManager {
    * @return the newly created <code>User</code>
    */
   public User createUser(RegisterRequest request) {
-    if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+    if (userRepository.existsByEmail(request.getEmail())) {
       throw new IllegalArgumentException("Email already in use");
     }
 
-    User user = mapper.fromRegisterRequestDTOtoUser(request);
-    user.setPassword(encoder.encode(request.getPassword()));
-    user.setRole(Role.USER);
-    user.setVerified(false);
+    User user = User
+        .builder()
+        .email(request.getEmail())
+        .password(encoder.encode(request.getPassword()))
+        .role(Role.USER)
+        .verified(false)
+        .build()
+        ;
 
     return userRepository.save(user);
   }

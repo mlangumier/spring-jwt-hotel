@@ -5,6 +5,7 @@ import fr.hb.mlang.hotel.user.domain.Role;
 public record UserDTO(
     String id,
     String username,
-    Role role
+    Role role,
+    boolean valid
 ) {
 }

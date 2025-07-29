@@ -39,22 +39,8 @@ public class DataLoader implements CommandLineRunner {
     }
 
     if (userRepository.count() == 0) {
-      User user1 = new User(
-          null,
-          "user@test.com",
-          encoder.encode("password"),
-          Role.USER,
-          true,
-          List.of()
-      );
-      User user2 = new User(
-          null,
-          "admin@test.com",
-          encoder.encode("password"),
-          Role.ADMIN,
-          true,
-          List.of()
-      );
+      User user1 = User.builder().email("user@test.com").password(encoder.encode("password")).role(Role.USER).verified(true).build();
+      User user2 = User.builder().email("admin@test.com").password(encoder.encode("password")).role(Role.ADMIN).verified(true).build();
       userRepository.saveAll(List.of(user1, user2));
 
       Room room1 = new Room(null, "110", 2, 90.00, List.of());

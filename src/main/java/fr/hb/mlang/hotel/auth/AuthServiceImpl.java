@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
     registrationManager.verifyUser(userEmail);
   }
 
-  public void resetPassword(String email) {
+  public void sendResetPasswordEmail(String email) {
     User user = (User) userService.loadUserByUsername(email);
 
     String token = jwtService.generateResetPasswordToken(user);
@@ -133,7 +133,6 @@ public class AuthServiceImpl implements AuthService {
   }
 
   public void logout(HttpServletRequest request, HttpServletResponse response) {
-
     Arrays
         .stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
         .filter(cookie -> cookie.getName().equals(jwtRefreshTokenName))

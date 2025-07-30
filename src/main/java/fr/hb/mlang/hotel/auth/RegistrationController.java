@@ -36,7 +36,7 @@ public class RegistrationController {
 
   @PostMapping("/forgot-password")
   public ResponseEntity<String> sentResetPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-    authService.resetPassword(request.email());
+    authService.sendResetPasswordEmail(request.email());
     return ResponseEntity.ok("Reset password email sent!");
   }
 

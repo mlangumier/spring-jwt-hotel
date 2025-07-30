@@ -9,13 +9,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
+
+  //TODO: refactor for "SOLID"
+
+  @Value("${app.url.base}")
+  private String baseUrl;
 
   private final JavaMailSender mailSender;
   private final SpringTemplateEngine templateEngine;
@@ -45,19 +49,37 @@ public class EmailServiceImpl implements EmailService {
   public void sendVerificationEmail(User user, String token) {
     String verificationMailContent = this.prepareVerificationEmailContent(token);
 
-    EmailDetails emailDetails = new EmailDetails(user,"Welcome to JWT-Hotel",verificationMailContent);
+    EmailDetails emailDetails = new EmailDetails(user,"Welcome to JWT-Hotel", verificationMailContent);
 
     this.sendEmail(emailDetails);
   }
 
   @Override
-  public String prepareVerificationEmailContent(String jwtToken) {
+  public String prepareVerificationEmailContent(String token) {
     Context context = new Context();
 
-    String serverUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
-    String verificationUrl = serverUrl + "/api/v1/verify/" + jwtToken;
+    String verificationUrl = baseUrl + "/verify?token=" + token;
 
     context.setVariable("verificationUrl", verificationUrl);
     return templateEngine.process("user-verify", context);
+  }
+
+  @Override
+  public void sendResetPasswordEmail(User user, String token) {
+    String resetPasswordMailContent = this.prepareResetPasswordEmailContent(token);
+
+    EmailDetails emailDetails = new EmailDetails(user,"JWT Hotel - Reset Password", resetPasswordMailContent);
+
+    this.sendEmail(emailDetails);
+  }
+
+  @Override
+  public String prepareResetPasswordEmailContent(String token) {
+    Context context = new Context();
+
+    String resetPasswordUrl = baseUrl + "/reset-password?token=" + token;
+
+    context.setVariable("resetPasswordUrl", resetPasswordUrl);
+    return templateEngine.process("reset-password", context);
   }
 }

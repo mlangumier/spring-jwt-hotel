@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.security;
+package fr.hb.mlang.hotel.security.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;

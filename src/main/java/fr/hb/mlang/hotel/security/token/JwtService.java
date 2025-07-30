@@ -1,4 +1,4 @@
-package fr.hb.mlang.hotel.security;
+package fr.hb.mlang.hotel.security.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -40,6 +40,9 @@ public class JwtService {
   @Value("${app.jwt.verification.expiration}")
   private long verificationTokenDuration;
 
+  @Value("${app.jwt.password.expiration}")
+  private long resetTokenExpiration;
+
   public String generateVerificationToken(UserDetails userDetails) {
     return generateToken(userDetails, verificationTokenDuration, new HashMap<>());
   }
@@ -50,6 +53,10 @@ public class JwtService {
 
   public String generateRefreshToken(UserDetails userDetails) {
     return generateToken(userDetails, refreshTokenExpiration, new HashMap<>());
+  }
+
+  public String generateResetPasswordToken(UserDetails userDetails) {
+    return generateToken(userDetails, resetTokenExpiration,new HashMap<>());
   }
 
   public String generateToken(

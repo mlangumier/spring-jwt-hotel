@@ -6,9 +6,10 @@ import fr.hb.mlang.hotel.auth.dto.LoginRequest;
 import fr.hb.mlang.hotel.auth.dto.RegisterRequest;
 import fr.hb.mlang.hotel.email.EmailService;
 import fr.hb.mlang.hotel.security.CookieUtil;
-import fr.hb.mlang.hotel.security.JwtService;
+import fr.hb.mlang.hotel.security.token.JwtService;
 import fr.hb.mlang.hotel.security.token.RefreshToken;
 import fr.hb.mlang.hotel.security.token.RefreshTokenRepository;
+import fr.hb.mlang.hotel.user.UserService;
 import fr.hb.mlang.hotel.user.domain.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,12 +35,13 @@ public class AuthServiceImpl implements AuthService {
   @Value("${app.jwt.refresh}")
   private String jwtRefreshTokenName;
 
-  private final UserDetailsService userDetailsService;
+  private final UserService userService;
   private final RefreshTokenRepository refreshTokenRepository;
   private final JwtService jwtService;
   private final AuthenticationManager authManager;
   private final EmailService emailService;
   private final RegistrationManager registrationManager;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public void register(RegisterRequest request) {
@@ -54,6 +56,25 @@ public class AuthServiceImpl implements AuthService {
     String userEmail = jwtService.extractUsernameFromToken(token);
 
     registrationManager.verifyUser(userEmail);
+  }
+
+  public void resetPassword(String email) {
+    User user = (User) userService.loadUserByUsername(email);
+
+    String token = jwtService.generateResetPasswordToken(user);
+
+    emailService.sendResetPasswordEmail(user, token);
+  }
+
+  public void updatePassword(String token, String newPassword) {
+    String userEmail = jwtService.extractUsernameFromToken(token);
+
+    User user = (User) userService.loadUserByUsername(userEmail);
+
+    String hashedPassword = passwordEncoder.encode(newPassword);
+    user.setPassword(hashedPassword);
+
+    userService.updateUser(user);
   }
 
   public JwtTokensDto authenticate(LoginRequest request, HttpServletResponse response) {
@@ -98,7 +119,7 @@ public class AuthServiceImpl implements AuthService {
 
     // Validate token structure
     String userEmail = jwtService.extractUsernameFromToken(refreshToken);
-    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+    UserDetails userDetails = userService.loadUserByUsername(userEmail);
 
     // Check if corresponds to a persisted entity
     if (!jwtService.isTokenValid(refreshToken, userDetails)) {

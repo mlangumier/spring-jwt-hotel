@@ -1,4 +1,4 @@
-### Register a new User & send validation email (with body)
+### Register - User creates an account & receives validation email (with body)
 POST {{base_url}}/auth/register
 Content-Type: application/json
 
@@ -7,10 +7,10 @@ Content-Type: application/json
   "password": "{{user.password}}"
 }
 
-### Validate a user using the activation link in the email received after registration
+### Verify user - Verifies a new user using the activation link in the email received after registration
 GET {{base_url}}/auth/verify?token={{user.verify_token}}
 
-### Login + creates an IntelliJ variable "auth_token" for next requests
+### Login - Logs in a user and creates an IntelliJ variable "auth_token" for next requests (simulates frontend requests)
 POST {{base_url}}/auth/login
 Content-Type: application/json
 
@@ -25,6 +25,22 @@ Content-Type: application/json
 POST {{base_url}}/auth/logout
 Authorization: Bearer {{access_token}}
 
-### Get all users
+### Forgot Password - send reset password email
+POST {{base_url}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "{{user.email}}"
+}
+
+### Reset password - Defines a new password
+PATCH {{base_url}}/auth/reset-password?token={{user.reset_token}}
+Content-Type: application/json
+
+{
+  "password": "new-password"
+}
+
+### Get all users - Get the full list of users
 GET {{base_url}}/users
 Authorization: Bearer {{access_token}}

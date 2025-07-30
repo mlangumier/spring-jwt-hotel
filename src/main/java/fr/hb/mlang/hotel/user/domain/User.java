@@ -1,23 +1,22 @@
 package fr.hb.mlang.hotel.user.domain;
 
 import fr.hb.mlang.hotel.booking.Booking;
-import fr.hb.mlang.hotel.security.token.RefreshToken;
 import jakarta.persistence.*;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

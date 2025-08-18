@@ -17,13 +17,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Component that generates data if the database is empty / doesn't have any users. This component
+ * will only work in "dev" and "test" profile (see comment bellow).
+ */
 @Component
 @Profile({"dev"})
 //@Profile({"dev", "test"}) // Replace line above with this one after implementing Test files & test database setup
 @RequiredArgsConstructor
 @Log4j2
 public class DataLoader implements CommandLineRunner {
-  //TODO: use Services + reusable DTOs (with data validation) to persist data
 
   private final UserRepository userRepository;
   private final RoomRepository roomRepository;
@@ -50,16 +53,14 @@ public class DataLoader implements CommandLineRunner {
             .password(encoder.encode("password"))
             .role(Role.USER)
             .verified(true)
-            .build()
-            ;
+            .build();
         User user2 = User
             .builder()
             .email("admin@test.com")
             .password(encoder.encode("password"))
             .role(Role.ADMIN)
             .verified(true)
-            .build()
-            ;
+            .build();
         userRepository.saveAll(List.of(user1, user2));
 
         Room room1 = new Room(null, "110", 2, 90.00, List.of());

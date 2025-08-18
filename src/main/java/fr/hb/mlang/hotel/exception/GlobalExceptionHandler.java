@@ -10,6 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ * Manages the app's exceptions by regrouping the way they are handled and making sure they all
+ * follow the same structure.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

@@ -1,42 +1,57 @@
 # Hotel management app
 
-**Description**: Basis of an app that allows for users to book hotel rooms.
-**Features**: Authentication and sessions with JWT & Spring Security.
+**Description**: Demo app that allows users to book hotel rooms.
+**Features**: Authentication with JWT & Spring Security and cookie-based sessions (login,
+authenticated routes, logout).
 
-## Setup
+## Dependencies
 
-### Dependencies
-
-- Spring Framework Start:
+- **Spring Framework**:
     - Spring Web
     - Actuator
     - DevTools
     - Spring Test
-    - Spring Docker Compose -> For MySQL server container
-- Coding:
-    - Lombok -> 
-    - MapStruct
-- Database:
+    - Spring Docker Compose -> For MySQL server container (see next items in the list)
+- **Database**:
     - Spring Data JPA
     - MySQL, H2 database (tests)
     - Spring Validation
-- Security & Authentication:
+- **Code**:
+    - Lombok -> For a cleaner way to write getters, setters, constructors, and use the `Builder`
+      method.
+    - MapStruct -> Simpler entities-DTOs mapping (
+      documentation [here](https://github.com/mapstruct/mapstruct/tree/main/documentation/src/main/asciidoc))
+- **Security & Authentication**:
     - Spring Security
     - Auth0, Json Web Token (jjwt-api, jjwt-impl, jjwt-jackson)
-- Emails:
+- **Emails**:
     - Spring Mail
-    - Thymeleaf + Thymeleaf Extra (security)
+    - Thymeleaf + Thymeleaf Extras Spring-security ()
 
-## Database
+## Setup & Install
 
-MySQL database in a `Docker` container. Requires `Docker Desktop` running, then dependency
-`spring-boot-docker-desktop` allows the MySQL container to run automatically when starting the app.
+In order to try out or work on this project, there are a few things to be aware of and some set up
+to do.   
+First of all, create the file `src/main/resources/application-dev.properties` next to the main
+`application.properties` file. Because we've set it in `.gitignore`, this file exists only locally
+and contains sensitive information, such as `GMAIL username` (for emails) and `JWT secret key` (for
+JWT generation).
+(Clean install, docker, start, etc.)
+
+### Database
+
+This project uses a MySQL database in a `Docker` container. It requires `Docker Desktop` to run, and
+because of the `spring-boot-docker-desktop` dependency, the container with our database will run
+automatically when we start the app.  
+If you prefer using a local MySQL server, feel free to remove the dependency from the `pom.xml` file
+to prevent the container from starting automatically.
 
 ### JWT
 
+To generate our JWTs, we'll need to get a secret key in `256 bits` from the following link:
 [Online secret key generator (in 256 bits)](https://jwtsecrets.com/#generator)
 
-In `src/main/resources/application-dev.properties`:
+And paste it with the following property in `application-dev.properties`:
 
 ```properties
 app.jwt.secret.key=<my-secret-key>
@@ -45,28 +60,10 @@ app.jwt.secret.key=<my-secret-key>
 ### Messaging
 
 Using `Gmail SMTP` for emailing purposes (sign up validation, reset password, etc.). In
-`application.properties`, adding the line `spring.profiles.active=dev` signals Spring Boot we're
-using an `application-dev.properties` file for local set up that won't be added to the `Github`
-repository (need to add `application-dev.properties` to the `.gitignore` manually, using it a
-similar way to `.env` files, here). In this file, the username (Gmail email address) and password (
-Gmail app password for this project) are added locally:
-
-In `src/main/resources/application-dev.properties`:
+`application-dev.properties`, add your GMAIL username (email address) and app password (
+see [how to create an app password](https://support.google.com/mail/answer/185833)):
 
 ```properties
 spring.mail.username=<my-gmail-username>
 spring.mail.password=<my-gmail-app-password>
 ```
-
-## TODO: Improvements & best practices
-
-- [x] Rework full JWT implement for access & refresh token (new project then transfer here)
-- [ ] Add extensive JavaDoc & add logs to errors (with @Log4j2)
-- [ ] Set up role-based routes & authorizations
-- [ ] Refactor files to follow SOLID principles as much as possible
-- [ ] Continue basic CRUD routes & security
-- [ ] Set up CSRF protection for sessions
-- [ ] Set up HTTPS
-- [ ] Start API documentation
-    - [ ] Code set up
-    - [ ] Web page for preview & tests

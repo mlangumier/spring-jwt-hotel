@@ -77,6 +77,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
   }
 
+  /**
+   * Exception handler for JWT.
+   *
+   * @param response Response of the request
+   * @param message  Message of the exception
+   * @param code     Error code that corresponds to the exception
+   * @throws IOException formatted for better readability.
+   */
   private void handleJwtException(HttpServletResponse response, String message, String code)
       throws IOException {
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

@@ -52,12 +52,14 @@ public class AuthServiceImpl implements AuthService {
     emailService.sendVerificationEmail(user, token);
   }
 
+  @Override
   public void verifyAccount(String token) {
     String userEmail = jwtService.extractUsernameFromToken(token);
 
     registrationManager.verifyUser(userEmail);
   }
 
+  @Override
   public void sendResetPasswordEmail(String email) {
     User user = (User) userService.loadUserByUsername(email);
 
@@ -66,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
     emailService.sendResetPasswordEmail(user, token);
   }
 
+  @Override
   public void updatePassword(String token, String newPassword) {
     String userEmail = jwtService.extractUsernameFromToken(token);
 
@@ -77,6 +80,7 @@ public class AuthServiceImpl implements AuthService {
     userService.updateUser(user);
   }
 
+  @Override
   public JwtTokensDto authenticate(LoginRequest request, HttpServletResponse response) {
     Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(
         request.getEmail(),
@@ -104,6 +108,7 @@ public class AuthServiceImpl implements AuthService {
     return JwtTokensDto.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
 
+  @Override
   public JwtTokensDto refreshToken(HttpServletRequest request) {
     String refreshToken = Arrays
         .stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
@@ -132,6 +137,7 @@ public class AuthServiceImpl implements AuthService {
     return JwtTokensDto.builder().accessToken(newAccessToken).refreshToken(refreshToken).build();
   }
 
+  @Override
   public void logout(HttpServletRequest request, HttpServletResponse response) {
     Arrays
         .stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))

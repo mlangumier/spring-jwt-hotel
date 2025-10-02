@@ -4,7 +4,7 @@ import fr.hb.mlang.hotel.user.domain.Role;
 
 public record UserDTO(
     String id,
-    String username,
+    String email,
     Role role,
     boolean valid
 ) {

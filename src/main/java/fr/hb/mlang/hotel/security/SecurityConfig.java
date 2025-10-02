@@ -1,6 +1,8 @@
 package fr.hb.mlang.hotel.security;
 
 import fr.hb.mlang.hotel.security.token.JwtAuthenticationFilter;
+import java.time.Duration;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +13,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,6 +29,7 @@ public class SecurityConfig {
     http
         // Prevents injections trying to steal cookies (no sessions)
         .csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         // Manages routes authorizations
         .authorizeHttpRequests(auth -> auth
             // Public routes (whitelisted)
@@ -32,6 +38,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/v1/auth/verify").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password").permitAll()
             .requestMatchers(HttpMethod.PATCH, "/api/v1/auth/reset-password").permitAll()
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             // Private routes (authenticated only)
             .anyRequest().authenticated())
         // Prevents Spring Security from managing sessions ()
@@ -42,5 +49,19 @@ public class SecurityConfig {
     ;
 
     return http.build();
+  }
+
+  @Bean
+  CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(List.of("http://localhost:4200"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+    config.setMaxAge(Duration.ofHours(1));
+    config.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
   }
 }

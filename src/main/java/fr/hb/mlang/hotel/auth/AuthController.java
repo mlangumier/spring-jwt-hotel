@@ -27,6 +27,7 @@ public class AuthController {
       @Valid @RequestBody LoginRequest request,
       HttpServletResponse response
   ) {
+    //TODO: this method should also return the User
     JwtTokensDto tokens = authService.authenticate(request, response);
 
     response.addHeader(
@@ -34,6 +35,7 @@ public class AuthController {
         CookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()).toString()
     );
 
+    //TODO: should return LoginResponse (token + user)
     return ResponseEntity.ok(LoginResponse.builder().accessToken(tokens.getAccessToken()).build());
   }
 

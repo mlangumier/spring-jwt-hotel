@@ -24,7 +24,7 @@ public class CookieUtil {
         .httpOnly(true)
         .secure(false) // {true} for production & HTTPS setup
         .path("/api/v1/auth")
-        .sameSite(SameSiteCookies.NONE.toString())
+        .sameSite(SameSiteCookies.NONE.toString()) //TODO: check if causes issue with AuthController.refreshToken() method
         .maxAge(tokenExpiration)
         .build();
   }
